@@ -22,7 +22,7 @@ import zlib
 if sys.hexversion >= 0x03000000:
     unicode = str
 
-__version__ = '1.1.1'
+__version__ = '1.1.2'
 
 
 class IndexBuilder(object):
