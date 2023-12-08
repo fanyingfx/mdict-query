@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
-"""_summary_
-Mdict query
-Returns:
-    _type_: _description_
-"""
+# version: python 3.5
 
 
 from readmdict import MDX, MDD
@@ -18,17 +14,13 @@ import json
 # zlib compression is used for engine version >=2.0
 import zlib
 # LZO compression is used for engine version < 2.0
-try:
-    import lzo
-except ImportError:
-    lzo = None
-    #print("LZO compression support is not available")
+
 
 # 2x3 compatible
 if sys.hexversion >= 0x03000000:
     unicode = str
 
-__version__ = '1.1.0'
+__version__ = '1.1.1'
 
 
 class IndexBuilder(object):
@@ -126,54 +118,6 @@ class IndexBuilder(object):
                 txt_styled = txt_styled + style[0] + p + style[1]
         return txt_styled
 
-
-    def make_sqlite(self):
-        sqlite_file = self._mdx_file + '.sqlite.db'
-        if os.path.exists(sqlite_file):
-            os.remove(sqlite_file)
-        mdx = MDX(self._mdx_file)
-        conn = sqlite3.connect(sqlite_file)
-        cursor = conn.cursor()
-        cursor.execute(
-            ''' CREATE TABLE MDX_DICT
-                (key text not null,
-                value text
-                )'''
-            )
-
-        # remove '(pīnyīn)', remove `1`:
-        aeiou = 'āáǎàĀÁǍÀēéěèêềếĒÉĚÈÊỀẾīíǐìÍǏÌōóǒòŌÓǑÒūúǔùŪÚǓÙǖǘǚǜǕǗǙǛḾǹňŃŇ'
-        pattern = r"`\d+`|[（\(]?['a-z%s]*[%s]['a-z%s]*[\)）]?"%(aeiou, aeiou, aeiou)
-        tuple_list = [(key.decode(), re.sub(pattern, '', value.decode()))
-            for key, value in mdx.items()]
-
-        cursor.executemany('INSERT INTO MDX_DICT VALUES (?,?)', tuple_list)
-
-        returned_index = mdx.get_index(check_block = self._check)
-        meta = returned_index['meta']
-        cursor.execute(
-            '''CREATE TABLE META (key text, value text)''')
-
-        cursor.executemany(
-            'INSERT INTO META VALUES (?,?)',
-            [('encoding', meta['encoding']),
-             ('stylesheet', meta['stylesheet']),
-             ('title', meta['title']),
-             ('description', meta['description']),
-             ('version', version)
-             ]
-            )
-
-        if self._sql_index:
-            cursor.execute(
-                '''
-                CREATE INDEX key_index ON MDX_DICT (key)
-                '''
-                )
-        conn.commit()
-        conn.close()
-
-
     def _make_mdx_index(self, db_name):
         if os.path.exists(db_name):
             os.remove(db_name)
@@ -249,7 +193,6 @@ class IndexBuilder(object):
         self._title = meta['title']
         self._description = meta['description']
 
-
     def _make_mdd_index(self, db_name):
         if os.path.exists(db_name):
             os.remove(db_name)
@@ -295,8 +238,7 @@ class IndexBuilder(object):
         conn.commit()
         conn.close()
 
-    @staticmethod
-    def get_data_by_index(fmdx, index):
+    def get_mdx_by_index(self, fmdx, index):
         fmdx.seek(index['file_pos'])
         record_block_compressed = fmdx.read(index['compressed_size'])
         record_block_type = record_block_compressed[:4]
@@ -316,79 +258,105 @@ class IndexBuilder(object):
         elif record_block_type == 2:
             # decompress
             _record_block = zlib.decompress(record_block_compressed[8:])
-        data = _record_block[index['record_start'] - index['offset']:index['record_end'] - index['offset']]
-        return data
-
-    def get_mdx_by_index(self, fmdx, index):
-        data = self.get_data_by_index(fmdx,index)
-        record  = data.decode(self._encoding, errors='ignore').strip(u'\x00').encode('utf-8')
+        record = _record_block[index['record_start'] - index['offset']:index['record_end'] - index['offset']]
+        record = record = record.decode(self._encoding, errors='ignore').strip(u'\x00').encode('utf-8')
         if self._stylesheet:
             record = self._replace_stylesheet(record)
         record = record.decode('utf-8')
         return record
 
     def get_mdd_by_index(self, fmdx, index):
-        return self.get_data_by_index(fmdx,index)
+        fmdx.seek(index['file_pos'])
+        record_block_compressed = fmdx.read(index['compressed_size'])
+        record_block_type = record_block_compressed[:4]
+        record_block_type = index['record_block_type']
+        decompressed_size = index['decompressed_size']
+        #adler32 = unpack('>I', record_block_compressed[4:8])[0]
+        if record_block_type == 0:
+            _record_block = record_block_compressed[8:]
+            # lzo compression
+        elif record_block_type == 1:
+            if lzo is None:
+                print("LZO compression is not supported")
+                # decompress
+            header = b'\xf0' + pack('>I', index['decompressed_size'])
+            _record_block = lzo.decompress(record_block_compressed[8:], initSize = decompressed_size, blockSize=1308672)
+                # zlib compression
+        elif record_block_type == 2:
+            # decompress
+            _record_block = zlib.decompress(record_block_compressed[8:])
+        data = _record_block[index['record_start'] - index['offset']:index['record_end'] - index['offset']]        
+        return data
 
-    @staticmethod
-    def lookup_indexes(db,keyword,ignorecase=None):
-        indexes = []
-        if ignorecase:
-            sql = 'SELECT * FROM MDX_INDEX WHERE lower(key_text) = lower("{}")'.format(keyword)
-        else:
-            sql = 'SELECT * FROM MDX_INDEX WHERE key_text = "{}"'.format(keyword)
-        with sqlite3.connect(db) as conn:
-            cursor = conn.execute(sql)
-            for result in cursor:
-                index = {}
-                index['file_pos'] = result[1]
-                index['compressed_size'] = result[2]
-                index['decompressed_size'] = result[3]
-                index['record_block_type'] = result[4]
-                index['record_start'] = result[5]
-                index['record_end'] = result[6]
-                index['offset'] = result[7]
-                indexes.append(index)
-        return indexes
-
-    def mdx_lookup(self, keyword,ignorecase=None):
+    def mdx_lookup(self, keyword):
+        conn = sqlite3.connect(self._mdx_db)
+        cursor = conn.execute("SELECT * FROM MDX_INDEX WHERE key_text = " + "\"" + keyword + "\"")
         lookup_result_list = []
-        indexes = self.lookup_indexes(self._mdx_db,keyword,ignorecase)
-        with open(self._mdx_file,'rb') as mdx_file:
-            for index in indexes:
-                lookup_result_list.append(self.get_mdx_by_index(mdx_file, index))
+        mdx_file = open(self._mdx_file,'rb')
+        for result in cursor:
+            index = {}
+            index['file_pos'] = result[1]
+            index['compressed_size'] = result[2]
+            index['decompressed_size'] = result[3]
+            index['record_block_type'] = result[4]
+            index['record_start'] = result[5]
+            index['record_end'] = result[6]
+            index['offset'] = result[7]
+            lookup_result_list.append(self.get_mdx_by_index(mdx_file, index))
+        conn.close()
+        mdx_file.close()
+        return lookup_result_list
+	
+    def mdd_lookup(self, keyword):
+        conn = sqlite3.connect(self._mdd_db)
+        cursor = conn.execute("SELECT * FROM MDX_INDEX WHERE key_text = " + "\"" + keyword + "\"")
+        lookup_result_list = []
+        mdd_file = open(self._mdd_file,'rb')
+        for result in cursor:
+            index = {}
+            index['file_pos'] = result[1]
+            index['compressed_size'] = result[2]
+            index['decompressed_size'] = result[3]
+            index['record_block_type'] = result[4]
+            index['record_start'] = result[5]
+            index['record_end'] = result[6]
+            index['offset'] = result[7]
+            lookup_result_list.append(self.get_mdd_by_index(mdd_file, index))
+        mdd_file.close()
+        conn.close()
         return lookup_result_list
 
-    def mdd_lookup(self, keyword,ignorecase=None):
-        lookup_result_list = []
-        indexes = self.lookup_indexes(self._mdd_db,keyword,ignorecase)
-        with open(self._mdd_file,'rb') as mdd_file:
-            for index in indexes:
-                lookup_result_list.append(self.get_mdd_by_index(mdd_file, index))
-        return lookup_result_list
-
-    @staticmethod
-    def get_keys(db,query = ''):
-        if not db:
+    def get_mdd_keys(self, query = ''):
+        if not self._mdd_db:
             return []
+        conn = sqlite3.connect(self._mdd_db)
         if query:
             if '*' in query:
                 query = query.replace('*','%')
             else:
                 query = query + '%'
-            sql = 'SELECT key_text FROM MDX_INDEX WHERE key_text LIKE \"' + query + '\"'
-        else:
-            sql = 'SELECT key_text FROM MDX_INDEX'
-        with sqlite3.connect(db) as conn:
-            cursor = conn.execute(sql)
+            cursor = conn.execute('SELECT key_text FROM MDX_INDEX WHERE key_text LIKE \"' + query + '\"')
             keys = [item[0] for item in cursor]
-            return keys
-
-    def get_mdd_keys(self, query = ''):
-        return self.get_keys(self._mdd_db,query)
+        else:
+            cursor = conn.execute('SELECT key_text FROM MDX_INDEX')
+            keys = [item[0] for item in cursor]
+        conn.close()
+        return keys
 
     def get_mdx_keys(self, query = ''):
-        return self.get_keys(self._mdx_db,query)
+        conn = sqlite3.connect(self._mdx_db)
+        if query:
+            if '*' in query:
+                query = query.replace('*','%')
+            else:
+                query = query + '%'
+            cursor = conn.execute('SELECT key_text FROM MDX_INDEX WHERE key_text LIKE \"' + query + '\"')
+            keys = [item[0] for item in cursor]
+        else:
+            cursor = conn.execute('SELECT key_text FROM MDX_INDEX')
+            keys = [item[0] for item in cursor]
+        conn.close()
+        return keys
 
 
 
