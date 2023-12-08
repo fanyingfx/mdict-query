@@ -9,3 +9,5 @@ readme = "README.md"
 dynamic = ["version", "description"]
 [tool.flit.module]
 name = "mdict_query"
+[tool.flit.sdist]
+include = ["./"]
