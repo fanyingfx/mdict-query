@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+"""_summary_
+Mdict query
+Returns:
+    _type_: _description_
+"""
 
 
 from readmdict import MDX, MDD
@@ -23,7 +28,7 @@ except ImportError:
 if sys.hexversion >= 0x03000000:
     unicode = str
 
-version = '1.1'
+__version__ = '1.1.0'
 
 
 class IndexBuilder(object):
