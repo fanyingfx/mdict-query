@@ -1,13 +1,10 @@
 [build-system]
 requires = ["flit_core >=3.2,<4"]
 build-backend = "flit_core.buildapi"
-
+[tool.flit.module]
+name = "mdict-query"
 [project]
-name = "mdict_query"
+name = "mdict-query"
 authors = [{name = "fanyingfx", email = "fanyingfx@outlook.com"}]
 readme = "README.md"
 dynamic = ["version", "description"]
-[tool.flit.module]
-name = "mdict_query"
-[tool.flit.sdist]
-include = ["./"]
