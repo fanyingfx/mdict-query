@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # version: python 3.5
+"""mdict_query
 
+"""
 
 from readmdict import MDX, MDD
 from struct import pack, unpack
