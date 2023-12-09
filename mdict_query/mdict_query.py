@@ -4,7 +4,7 @@
 
 """
 
-from readmdict import MDX, MDD
+from mdict_query.readmdict import MDX, MDD
 from struct import pack, unpack
 from io import BytesIO
 import re
