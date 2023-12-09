@@ -2,7 +2,7 @@
 requires = ["flit_core >=3.2,<4"]
 build-backend = "flit_core.buildapi"
 [tool.flit.module]
-name = "mdict-query"
+name = "mdict_query"
 [project]
 name = "mdict-query"
 authors = [{name = "fanyingfx", email = "fanyingfx@outlook.com"}]
