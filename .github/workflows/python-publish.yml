@@ -42,4 +42,4 @@ jobs:
         # 相关 PR：https://github.com/softprops/action-gh-release/pull/304
         prerelease: ${{ !needs.check-update.outputs.update }}
         files: |
-          dist/*
+          dist/*.whl
