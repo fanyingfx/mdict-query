@@ -26,49 +26,6 @@ jobs:
       - name: fetch latest tag
         uses: actions/checkout@v4
         if: ${{ inputs.targetVersion == '' }}
-
-      - name: Pre-check
-        id: pre
-        if: ${{ inputs.targetVersion != '' }}
-        run: |
-          calibre_url="https://raw.githubusercontent.com/kovidgoyal/calibre/v${{ inputs.targetVersion }}/src/calibre/db/backend.py"
-          status_code=`curl -s -o /dev/null -w "%{http_code}" "${calibre_url}"`
-          if [ ${status_code} = "200" ]; then
-            if [ ! $(git tag -l "v${{ inputs.targetVersion }}") ]; then
-              echo "Target version check OK"
-              echo "build=1"                   >> $GITHUB_OUTPUT
-              echo "update=0"                  >> $GITHUB_OUTPUT
-              echo "version=${{ inputs.targetVersion }}"  >> $GITHUB_OUTPUT
-            else
-              # 本仓库 Tag 已存在
-              echo "Tag exists"
-              echo "::error title=Tag exists::Perhaps a patch for v${{ inputs.targetVersion }} has been created"
-              echo "build=0"                   >> $GITHUB_OUTPUT
-              echo "update=0"                  >> $GITHUB_OUTPUT
-            fi
-          else
-            # 目标版本不存在
-            echo "Target version not found"
-            echo "::error title=Invalid version::Calibre v${{ inputs.targetVersion }} not exists"
-            echo "build=0"                     >> $GITHUB_OUTPUT
-            echo "update=0"                    >> $GITHUB_OUTPUT
-          fi
-          cat $GITHUB_OUTPUT
-      - name: Check Version
-        id: check
-        if: ${{ inputs.targetVersion == '' }}
-        run: |
-          curl -k https://code.calibre-ebook.com/latest -o REMOTE_VERSION
-          echo "version=$(cat REMOTE_VERSION)" >> $GITHUB_OUTPUT
-          if diff --brief REMOTE_VERSION CALIBRE_VERSION > /dev/null; then
-            echo "::notice title=Calibre Version not Changed::$(cat REMOTE_VERSION)"
-            echo "build=0"   >> $GITHUB_OUTPUT
-            echo "update=0"  >> $GITHUB_OUTPUT
-          else
-            echo "::notice title=New Version Found!::$(cat REMOTE_VERSION)"
-            echo "build=1"    >> $GITHUB_OUTPUT
-            echo "update=1"   >> $GITHUB_OUTPUT
-          fi
       - name: Post-check
         id: post
         run: |
