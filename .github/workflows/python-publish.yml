@@ -26,6 +26,23 @@ jobs:
       - name: fetch latest tag
         uses: actions/checkout@v4
         if: ${{ inputs.targetVersion == '' }}
+      - name: Pre-check
+        id: pre
+        if: ${{ inputs.targetVersion != '' }}
+        run: |
+            if [ ! $(git tag -l "v${{ inputs.targetVersion }}") ]; then
+              echo "Target version check OK"
+              echo "build=1"                   >> $GITHUB_OUTPUT
+              echo "update=0"                  >> $GITHUB_OUTPUT
+              echo "version=${{ inputs.targetVersion }}"  >> $GITHUB_OUTPUT
+            else
+              # 本仓库 Tag 已存在
+              echo "Tag exists"
+              echo "::error title=Tag exists::Perhaps a patch for v${{ inputs.targetVersion }} has been created"
+              echo "build=0"                   >> $GITHUB_OUTPUT
+              echo "update=0"                  >> $GITHUB_OUTPUT
+            fi
+            cat $GITHUB_OUTPUT
       - name: Post-check
         id: post
         run: |
