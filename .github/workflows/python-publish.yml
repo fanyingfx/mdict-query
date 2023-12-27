@@ -33,11 +33,13 @@ jobs:
     - name: Build package
       run: flit build
     - name: Create Release
-      uses: "marvinpinto/action-automatic-releases@latest"
+      uses: softprops/action-gh-release@v0.1.15
       with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "latest"
-          prerelease: true
-          title: "Development Build"
-          files: |
-            dist/*.whl
+        body: mdict v${{ needs.check-update.outputs.version }}
+        draft: false
+        tag_name: v${{ needs.check-update.outputs.version }}
+        # 因为 softprops/action-gh-releas 还没加 make_latest 选项，所以先用 prerelease 标记
+        # 相关 PR：https://github.com/softprops/action-gh-release/pull/304
+        prerelease: ${{ !needs.check-update.outputs.update }}
+        files: |
+          *.whl
