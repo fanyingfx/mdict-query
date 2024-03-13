@@ -8,3 +8,6 @@ name = "mdict-query"
 authors = [{name = "fanyingfx", email = "fanyingfx@outlook.com"}]
 readme = "README.md"
 dynamic = ["version", "description"]
+[project.urls]
+Homepage = "https://github.com/pypa/sampleproject"
+Issues = "https://github.com/fanyingfx/mdict-query/issues"

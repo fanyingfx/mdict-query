@@ -3,12 +3,15 @@ This is a python module for looking up `mdict` dictionary files (`.mdx` and `.md
 >>Based on [readmdict](https://bitbucket.org/xwang/mdict-analysis) by [Xiaoqiang Wang](http://bitbucket.org/xwang/).
 
 While this project is a trivial extension of the [original module](https://bitbucket.org/xwang/mdict-analysis), it adds the features of looking up a single entry in `.mdx` or resource file in `.mdd` without extracting all content, which may be helpful in other projects that requires dictionaries.
+## Installation
+
+`pip install mdict_query`
 
 ## Usage
 
 Constructs the `IndexBuilder` object, which builds the sqlite index for `.mdx` file and the corresponding `.mdd` file (if exists).
 
-    from mdict_query import IndexBuilder
+    from mdict_query.mdict_query import IndexBuilder
     builder = IndexBuilder('ode.mdx')
 
 Convert `mdx` to `sqlite`:  

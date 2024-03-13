@@ -8,7 +8,6 @@ from mdict_query.readmdict import MDX, MDD
 from struct import pack, unpack
 from io import BytesIO
 import re
-import sys
 import os
 import sqlite3
 import json
@@ -17,10 +16,7 @@ import json
 import zlib
 # LZO compression is used for engine version < 2.0
 
-
 # 2x3 compatible
-if sys.hexversion >= 0x03000000:
-    unicode = str
 
 __version__ = '1.1.2'
 version = '1.1.2'
@@ -85,18 +81,6 @@ class IndexBuilder(object):
             for cc in cursor:
                 self._description = cc[1]
 
-            #for cc in cursor:
-            #    if cc[0] == 'encoding':
-            #        self._encoding = cc[1]
-            #        continue
-            #    if cc[0] == 'stylesheet':
-            #        self._stylesheet = json.loads(cc[1])
-            #        continue
-            #    if cc[0] == 'title':
-            #        self._title = cc[1]
-            #        continue
-            #    if cc[0] == 'title':
-            #        self._description = cc[1]
         else:
             self._make_mdx_index(self._mdx_db)
 
