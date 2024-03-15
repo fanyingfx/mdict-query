@@ -848,7 +848,7 @@ class MDX(MDict):
             size_counter += compressed_size
         #todo: 注意！！！
 		#assert(size_counter == record_block_size)
-        f.close
+        f.close()
         #这里比 mdd 部分稍有不同，应该还需要传递编码以及样式表信息
         meta = {}
         meta['encoding'] = self._encoding
