@@ -5,7 +5,7 @@ This is a python module for looking up `mdict` dictionary files (`.mdx` and `.md
 While this project is a trivial extension of the [original module](https://bitbucket.org/xwang/mdict-analysis), it adds the features of looking up a single entry in `.mdx` or resource file in `.mdd` without extracting all content, which may be helpful in other projects that requires dictionaries.
 ## Installation
 
-`pip install mdict_query`
+`pip install mdict-query`
 
 ## Usage
 

@@ -1,6 +1,6 @@
 from pathlib import Path
 from src.mdx_query.mdict_utils import MDXDict
-MDX_FILE= "mdx/olad10/Oxford Advanced Learner's Dictionary 10th.mdx"
+MDX_FILE= "D:/Code/mdict-query/mdx/olad10/Oxford Advanced Learner's Dictionary 10th.mdx"
 MDXPATH=Path(MDX_FILE)
 if __name__=='__main__':
 

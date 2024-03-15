@@ -5,7 +5,7 @@
 """
 from typing import Any
 
-from .readmdict import MDX, MDD
+from mdx_query.readmdictv3 import MDX, MDD
 from struct import pack, unpack
 from io import BytesIO
 import re
@@ -23,7 +23,6 @@ try:
     import lzo
 except ImportError:
     lzo = None
-version ="1.2.1"
 # 2x3 compatible
 class IndexBuilder:
     def __init__(self, fname, encoding="", passcode=None, force_rebuild=False, enable_history=False, sql_index=True,
@@ -33,7 +32,6 @@ class IndexBuilder:
         self._encoding = ''
         self._stylesheet = {}
         self._title = ''
-        self._version = ''
         self._description = ''
         self._sql_index = sql_index
         self._check = check
@@ -55,9 +53,7 @@ class IndexBuilder:
         with sqlite3.connect(self._mdx_db) as conn:
             cursor = conn.execute("SELECT * FROM META")
             for cc in cursor:
-                if cc[0] == "version":
-                    self._version = cc[1]
-                elif cc[0] == "encoding":
+                if cc[0] == "encoding":
                     self._encoding = cc[1]
                 elif cc[0] == "stylesheet":
                     self._stylesheet = json.loads(cc[1])
@@ -83,12 +79,9 @@ class IndexBuilder:
             os.remove(db_name)
         returned_index = reader.get_index(check_block=self._check)
         meta=None
-        match reader:
-            case MDX():
-                index_list = returned_index['index_dict_list']
-                meta = returned_index['meta']
-            case MDD():
-                index_list = returned_index
+        index_list = returned_index['index_dict_list']
+        if isinstance(reader,MDX):
+            meta = returned_index['meta']
         conn = sqlite3.connect(db_name)
         c = conn.cursor()
         c.execute(
@@ -139,7 +132,6 @@ class IndexBuilder:
                  ('stylesheet', meta['stylesheet']),
                  ('title', meta['title']),
                  ('description', meta['description']),
-                 ('version', version)
                  ]
             )
             # set class member
