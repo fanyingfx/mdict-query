@@ -40,7 +40,6 @@ try:
 except ImportError:
     xxhash = None
 
-
 # 2x3 compatible
 
 
@@ -91,7 +90,7 @@ class MDict(object):
     It has no public methods and serves only as code sharing base class.
     """
 
-    def __init__(self, fname: str, encoding: str = '', passcode: tuple[str, str] | None = None):
+    def __init__(self, fname:str, encoding:str='', passcode:tuple[str,str]|None=None):
         self._fname = fname
         self._encoding = encoding.upper()
         self._encrypted_key = None
@@ -717,8 +716,8 @@ class MDict(object):
         meta = {}
         meta['encoding'] = self._encoding
         meta['stylesheet'] = self._stylesheet
-        meta['title'] = self.header[b'Title'].decode(self._encoding)
-        meta['description'] = self.header[b'Title'].decode(self._encoding)
+        meta['title'] = self.header[b'Title'].decode()
+        meta['description'] = self.header[b'Title'].decode()
         return {"index_dict_list": index_dict_list, 'meta': meta}
 
     def get_index_v3(self, check_block=False):
@@ -790,8 +789,8 @@ class MDD(MDict):
     ... print filename, content[:10]
     """
 
-    def __init__(self, fname: str, passcode=None):
-        super().__init__(fname, encoding='UTF-16', passcode=passcode)
+    def __init__(self, fname, passcode=None):
+        super().__init__( fname, encoding='UTF-16', passcode=passcode)
 
 
 class MDX(MDict):
@@ -804,11 +803,11 @@ class MDX(MDict):
     ... print key, value[:10]
     """
 
-    def __init__(self, fname: str, encoding: str = '', substyle: bool = False, passcode=None):
-        super().__init__(fname, encoding, passcode)
+    def __init__(self, fname:str, substyle=False, passcode=None):
+        super().__init__(fname, passcode)
         self._substyle = substyle
 
-    def _substitute_stylesheet(self, txt: bytes) -> bytes:
+    def _substitute_stylesheet(self, txt:bytes)->bytes:
         # substitute stylesheet definition
         txt_list = re.split(rb'`\d+`', txt)
         txt_tag = re.findall(rb'`\d+`', txt)

@@ -99,8 +99,8 @@ builder = None
 
 
 class MDXDict:
-    def __init__(self, mdx_file_path: Path, name=None) -> None:
-        self.builder = IndexBuilder(mdx_file_path.as_posix())
+    def __init__(self, mdx_file_path: Path, name=None,encoding:str='') -> None:
+        self.builder = IndexBuilder(mdx_file_path.as_posix(),encoding=encoding)
         self.local_map = self.get_local_resource(mdx_file_path.parent)
         self.name = name
 

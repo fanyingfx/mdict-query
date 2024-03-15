@@ -7,6 +7,11 @@ if __name__=='__main__':
     mdx_dict= MDXDict(MDXPATH)
     res=mdx_dict.lookup('hello')
     file=mdx_dict.lookup('hello__gb_1.ogg')
-    s=res.decode('utf8')
-    print(s)
+
+    JP_MDX_FILE = 'C:/Users/fanzh/PycharmProjects/lute-backend/data/dicts/ja/Shogakukanjcv3/Shogakukanjcv3.mdx'
+    JP_MDXPATH = Path(JP_MDX_FILE)
+    jp_mdx_dict = MDXDict(JP_MDXPATH)
+    res=jp_mdx_dict.lookup('ニュース')
+    print(res.decode('utf-8'))
+
 

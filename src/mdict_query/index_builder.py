@@ -25,7 +25,7 @@ class IndexBuilder:
                  check=False):
         self._mdx_file = fname
         self._mdd_file = ""
-        self._encoding = ''
+        self._encoding = ""
         self._stylesheet = {}
         self._title = ''
         self._description = ''
