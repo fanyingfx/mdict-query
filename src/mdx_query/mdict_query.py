@@ -12,6 +12,7 @@ import re
 import os
 import sqlite3
 import json
+import importlib
 
 # zlib compression is used for engine version >=2.0
 import zlib
@@ -22,8 +23,8 @@ try:
     import lzo
 except ImportError:
     lzo = None
+version ="1.2.1"
 # 2x3 compatible
-
 class IndexBuilder:
     def __init__(self, fname, encoding="", passcode=None, force_rebuild=False, enable_history=False, sql_index=True,
                  check=False):
