@@ -9,18 +9,12 @@
 
 -e file:.
 beautifulsoup4==4.12.3
-    # via mdx-query
-colorama==0.4.6
-    # via tqdm
+    # via mdict-query
 install==1.3.5
-    # via mdx-query
-mdict-utils==1.3.12
-    # via mdx-query
+    # via mdict-query
 pip==24.0
-    # via mdx-query
+    # via mdict-query
 soupsieve==2.5
     # via beautifulsoup4
-tqdm==4.66.2
-    # via mdict-utils
 xxhash==3.4.1
-    # via mdict-utils
+    # via mdict-query

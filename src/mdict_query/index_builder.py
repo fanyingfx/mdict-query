@@ -5,25 +5,21 @@
 """
 from typing import Any
 
-from mdict_query.readmdictv3 import MDX, MDD
+from mdict_query.readmdict import MDX, MDD
 from struct import pack, unpack
 from io import BytesIO
 import re
 import os
 import sqlite3
 import json
-import importlib
 
 # zlib compression is used for engine version >=2.0
 import zlib
 
 # LZO compression is used for engine version < 2.0
+from mdict_query import lzo
 
-try:
-    import lzo
-except ImportError:
-    lzo = None
-# 2x3 compatible
+
 class IndexBuilder:
     def __init__(self, fname, encoding="", passcode=None, force_rebuild=False, enable_history=False, sql_index=True,
                  check=False):
@@ -61,6 +57,7 @@ class IndexBuilder:
                     self._title = cc[1]
                 elif cc[0] == "description":
                     self._description = cc[1]
+
     def _replace_stylesheet(self, txt):
         # substitute stylesheet definition
         txt_list = re.split(r'`\d+`', txt)
@@ -78,9 +75,9 @@ class IndexBuilder:
         if os.path.exists(db_name):
             os.remove(db_name)
         returned_index = reader.get_index(check_block=self._check)
-        meta=None
+        meta = None
         index_list = returned_index['index_dict_list']
-        if isinstance(reader,MDX):
+        if isinstance(reader, MDX):
             meta = returned_index['meta']
         conn = sqlite3.connect(db_name)
         c = conn.cursor()
@@ -155,6 +152,7 @@ class IndexBuilder:
             os.remove(db_name)
         mdd = MDD(self._mdd_file)
         self._make_db_index(db_name, mdd)
+
     def _get_by_index(self, fmdx, index, is_mdx=True):
         fmdx.seek(index['file_pos'])
         record_block_compressed = fmdx.read(index['compressed_size'])
@@ -185,7 +183,7 @@ class IndexBuilder:
     def get_mdd_by_index(self, fmdx, index):
         return self._get_by_index(fmdx, index, is_mdx=False)
 
-    def _db_lookup(self, keyword: str,file_path:str, db_path: str,is_mdx=True) -> list[str]:
+    def _db_lookup(self, keyword: str, file_path: str, db_path: str, is_mdx=True) -> list[str]:
         with sqlite3.connect(db_path) as conn:
             cursor = conn.execute(f'SELECT * FROM MDX_INDEX WHERE key_text="{keyword}"')
             lookup_result_list = []
@@ -199,14 +197,14 @@ class IndexBuilder:
                     index['record_start'] = result[5]
                     index['record_end'] = result[6]
                     index['offset'] = result[7]
-                    lookup_result_list.append(self._get_by_index(_file, index,is_mdx))
+                    lookup_result_list.append(self._get_by_index(_file, index, is_mdx))
             return lookup_result_list
 
     def mdx_lookup(self, keyword: str) -> list[str]:
-        return self._db_lookup(keyword,self._mdx_file, self._mdx_db,True)
+        return self._db_lookup(keyword, self._mdx_file, self._mdx_db, True)
 
     def mdd_lookup(self, keyword):
-        return self._db_lookup(keyword,self._mdd_file, self._mdd_db,False)
+        return self._db_lookup(keyword, self._mdd_file, self._mdd_db, False)
 
     def _get_keys(self, db_name, query=''):
         if not db_name:
