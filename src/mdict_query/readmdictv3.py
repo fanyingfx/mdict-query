@@ -22,8 +22,8 @@ from io import BytesIO
 import re
 import sys
 
-from mdx_query.mdxcrypt.ripemd128 import ripemd128
-from mdx_query.mdxcrypt.pureSalsa20 import Salsa20
+from mdict_query.mdxcrypt.ripemd128 import ripemd128
+from mdict_query.mdxcrypt.pureSalsa20 import Salsa20
 
 # zlib compression is used for engine version >=2.0
 import zlib

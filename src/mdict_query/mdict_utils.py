@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import List
 
 from bs4 import BeautifulSoup
-from mdx_query.mdict_query import IndexBuilder
+from mdict_query.index_builder import IndexBuilder
 
 content_type_map = {
     "html": "text/html; charset=utf-8",

@@ -5,7 +5,7 @@
 """
 from typing import Any
 
-from mdx_query.readmdictv3 import MDX, MDD
+from mdict_query.readmdictv3 import MDX, MDD
 from struct import pack, unpack
 from io import BytesIO
 import re

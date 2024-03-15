@@ -1,4 +1,4 @@
-from .mdict_query import IndexBuilder
+from .index_builder import IndexBuilder
 import os
 import json
 

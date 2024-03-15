@@ -1,6 +1,6 @@
 [project]
-name = "mdx-query"
-version = "0.2.0"
+name = "mdict-query"
+version = "0.2.1"
 description = "Add your description here"
 authors = [
     { name = "fanyingfx", email = "fanyingfx@outlook.com" }
@@ -26,4 +26,4 @@ dev-dependencies = []
 allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/mdx_query"]
+packages = ["src/mdict_query"]
