@@ -1,6 +1,6 @@
 [project]
 name = "mdict-query"
-version = "0.2.3"
+version = "0.2.4"
 description = "Add your description here"
 authors = [
     { name = "fanyingfx", email = "fanyingfx@outlook.com" }
